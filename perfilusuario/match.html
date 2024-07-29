@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinder Simulador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #FF5C5C, #FE8C8C);
+            color: white;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .profiles-wrapper {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-container, .small-profile-container {
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .profile-container {
+            width: 300px;
+            height: 400px;
+            background: #fff;
+            overflow: hidden;
+            transition: transform 0.5s ease;
+        }
+
+        .profile-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .small-profile-container {
+            width: 100px;
+            height: 130px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .small-profile-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .left-profile {
+            left: -120px;
+        }
+
+        .right-profile {
+            right: -120px;
+        }
+
+        .info-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #FF5864;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .info-btn:hover {
+            background: #FF3B3F;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
+        }
+
+        .controls button {
+            background: #FF5864;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            transition: background 0.3s ease;
+        }
+
+        .controls button:hover {
+            background: #FF3B3F;
+        }
+
+        .match-notification {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00C853;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .match-notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="profiles-wrapper">
+            <div id="leftProfile" class="small-profile-container left-profile">
+                <!-- Imagen del perfil anterior -->
+            </div>
+            <div class="profile-container" id="profileContainer">
+                <!-- Imagen del perfil actual -->
+            </div>
+            <div id="rightProfile" class="small-profile-container right-profile">
+                <!-- Imagen del perfil siguiente -->
+            </div>
+        </div>
+        <button id="infoBtn" class="info-btn hidden" onclick="reviewProfile()">👤 Revisar Perfil</button>
+        <div class="controls">
+            <button onclick="swipeLeft()">👎</button>
+            <button onclick="swipeRight()">👍</button>
+        </div>
+        <div id="matchNotification" class="match-notification hidden">
+            ¡Es un match!
+        </div>
+    </div>
+    <script>
+        const profiles = Array.from({ length: 50 }, (_, i) => ({
+            id: i + 1,
+            name: `Usuario ${i + 1}`,
+            image: `https://via.placeholder.com/300x400?text=Usuario+${i + 1}`,
+            details: `Detalles del Usuario ${i + 1}`
+        }));
+
+        let currentProfileIndex = 0;
+        const profileContainer = document.getElementById('profileContainer');
+        const leftProfile = document.getElementById('leftProfile');
+        const rightProfile = document.getElementById('rightProfile');
+        const infoBtn = document.getElementById('infoBtn');
+        const matchNotification = document.getElementById('matchNotification');
+
+        function showProfile(index) {
+            if (index >= profiles.length) {
+                profileContainer.innerHTML = '<p>No hay más perfiles.</p>';
+                leftProfile.innerHTML = '';
+                rightProfile.innerHTML = '';
+                infoBtn.classList.add('hidden');
+                return;
+            }
+            const profile = profiles[index];
+            profileContainer.innerHTML = `
+                <img src="${profile.image}" alt="${profile.name}">
+            `;
+            
+            // Mostrar perfiles anteriores y siguientes
+            if (index > 0) {
+                const prevProfile = profiles[index - 1];
+                leftProfile.innerHTML = `<img src="${prevProfile.image}" alt="${prevProfile.name}">`;
+                infoBtn.classList.remove('hidden');
+            } else {
+                leftProfile.innerHTML = '';
+                infoBtn.classList.add('hidden');
+            }
+
+            if (index < profiles.length - 1) {
+                const nextProfile = profiles[index + 1];
+                rightProfile.innerHTML = `<img src="${nextProfile.image}" alt="${nextProfile.name}">`;
+            } else {
+                rightProfile.innerHTML = '';
+            }
+
+            // Implementar el arrastre para swipe
+            const img = profileContainer.querySelector('img');
+            img.addEventListener('mousedown', startDrag);
+            img.addEventListener('touchstart', startDrag);
+        }
+
+        function startDrag(event) {
+            event.preventDefault();
+            const img = profileContainer.querySelector('img');
+            const startX = event.pageX || event.touches[0].pageX;
+            let isDragging = true;
+
+            function dragMove(e) {
+                if (isDragging) {
+                    const offsetX = (e.pageX || e.touches[0].pageX) - startX;
+                    profileContainer.style.transform = `translateX(${offsetX}px)`;
+                    img.style.transform = `scale(${1 - Math.abs(offsetX) / 1000})`;
+                }
+            }
+
+            function dragEnd(e) {
+                if (isDragging) {
+                    const offsetX = (e.pageX || e.changedTouches[0].pageX) - startX;
+                    if (Math.abs(offsetX) > 100) {
+                        if (offsetX > 0) swipeRight(); // Deslizar hacia la derecha
+                        else swipeLeft(); // Deslizar hacia la izquierda
+                    } else {
+                        profileContainer.style.transform = 'translateX(0)';
+                        img.style.transform = 'scale(1)';
+                    }
+                    isDragging = false;
+                    document.removeEventListener('mousemove', dragMove);
+                    document.removeEventListener('mouseup', dragEnd);
+                    document.removeEventListener('touchmove', dragMove);
+                    document.removeEventListener('touchend', dragEnd);
+                }
+            }
+
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchmove', dragMove);
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        function swipeLeft() {
+            profileContainer.style.transform = 'translateX(-100vw)';
+            setTimeout(() => {
+                profileContainer.style.transform = 'translateX(0)';
+                currentProfileIndex++;
+                showProfile(currentProfileIndex);
+            }, 300);
+        }
+
+        function swipeRight() {
+            profileContainer.style.transform = 'translateX(100vw)';
+            matchNotification.classList.add('show');
+            setTimeout(() => {
+                matchNotification.classList.remove('show');
+            }, 2000);
+            setTimeout(() => {
+                profileContainer.style.transform = 'translateX(0)';
+                currentProfileIndex++;
+                showProfile(currentProfileIndex);
+            }, 300);
+        }
+
+        function reviewProfile() {
+            if (currentProfileIndex > 0) {
+                const profile = profiles[currentProfileIndex - 1];
+                alert(profile.details); // Muestra los detalles del perfil anterior en un alert
+            }
+        }
+
+        // Inicializar con el primer perfil
+        showProfile(currentProfileIndex);
+    </script>
+</body>
+</html>

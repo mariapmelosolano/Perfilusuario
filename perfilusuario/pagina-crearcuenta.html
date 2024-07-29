@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - Tinder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fecece;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 300px;
+            padding: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .phone-input {
+            display: flex;
+            align-items: center;
+        }
+        .phone-input select {
+            width: 30%;
+            margin-right: 5px;
+        }
+        .phone-input input {
+            width: 70%;
+        }
+        .password-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .password-wrapper input {
+            width: calc(100% - 40px);
+            padding-right: 40px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button {
+            background-color: #ba5e6f;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #a54b5c;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .password-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <img src="imagen/Captura de pantalla 2024-07-29 083155.png" alt="Logo Tinder">
+        </div>
+        <form id="signup-form">
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <span class="toggle-password" id="toggle-password">👁️</span>
+            </div>
+            <div class="password-info" id="password-info">
+                <p>La contraseña debe contener al menos 8 caracteres, incluir una letra mayúscula y un carácter especial (permitiendo puntos).</p>
+            </div>
+            <input type="text" id="first-name" placeholder="Nombres" required>
+            <input type="text" id="last-name" placeholder="Apellidos" required>
+            <input type="date" id="birthdate" placeholder="Fecha de Nacimiento" required>
+            <div class="phone-input">
+                <select id="country-code" required>
+                    <option value="+57">+57 (Colombia)</option>
+                    <option value="+54">+54 (Argentina)</option>
+                    <option value="+55">+55 (Brasil)</option>
+                    <option value="+56">+56 (Chile)</option>
+                    <option value="+52">+52 (México)</option>
+                    <option value="+51">+51 (Perú)</option>
+                    <option value="+58">+58 (Venezuela)</option>
+                </select>
+                <input type="tel" id="phone" placeholder="Teléfono" required>
+            </div>
+            <button type="submit">Crear Cuenta</button>
+            <div class="error" id="form-error"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitar envío del formulario para depuración
+            
+            const formError = document.getElementById('form-error');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const birthdate = document.getElementById('birthdate').value;
+            const phone = document.getElementById('phone').value;
+            const countryCode = document.getElementById('country-code').value;
+
+            // Validar la contraseña
+            const passwordCriteria = /^(?=.*[A-Z])(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
+            if (!passwordCriteria.test(password)) {
+                formError.textContent = 'La contraseña debe contener al menos 8 caracteres, incluyendo una letra mayúscula y un carácter especial (permitiendo puntos).';
+                return;
+            }
+
+            // Validar la edad
+            const birthdateObj = new Date(birthdate);
+            const today = new Date();
+            const age = today.getFullYear() - birthdateObj.getFullYear();
+            const m = today.getMonth() - birthdateObj.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthdateObj.getDate())) {
+                age--;
+            }
+
+            if (age < 18) {
+                formError.textContent = 'Debes tener al menos 18 años para crear una cuenta.';
+                return;
+            }
+
+            // Obtener los usuarios registrados desde localStorage
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Verificar si el email ya está registrado
+            const existingUser = users.find(user => user.email === email);
+            if (existingUser) {
+                formError.textContent = 'El correo electrónico ya está registrado.';
+                return;
+            }
+
+            // Guardar los datos en localStorage
+            users.push({
+                email: email,
+                password: password,
+                firstName: firstName,
+                lastName: lastName,
+                birthdate: birthdate,
+                phone: phone,
+                countryCode: countryCode
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Redirigir a la página de inicio de sesión
+            window.location.href = 'mergeIniciarSesion.html';
+        });
+
+        // Mostrar/Ocultar Contraseña
+        document.getElementById('toggle-password').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+    </script>
+</body>
+</html>

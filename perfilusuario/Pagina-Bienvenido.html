@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Tinder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fecece;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px; /* Espacio entre los botones */
+        }
+        .login-button, .login-butt {
+            background-color: #ba5e6f;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-button:hover, .login-butt:hover {
+            background-color: #a54b5c;
+        }
+        .welcome-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            color: #ba5e6f;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="imagen/Captura de pantalla 2024-07-29 083155.png" alt="Logo Tinder">
+        </div>
+        <div class="header-buttons">
+            <button class="login-button" onclick="window.location.href='pagina-crearcuenta.html'">Crear Cuenta</button>
+            <button class="login-butt" onclick="window.location.href='mergeIniciarSesion.html'">Iniciar Sesión</button>
+        </div>
+    </div>
+    <div class="welcome-content">
+        <h1>Bienvenido a Tinder</h1>
+    </div>
+</body>
+</html>
